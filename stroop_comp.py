@@ -62,12 +62,13 @@ output = pnl.TransferMechanism(
     integrator_mode=True,
     integration_rate=integration_rate,
     noise=pnl.NormalDist(standard_deviation=unit_noise_std).function,
-    name='RESPONSE'
+    name='OUTPUT'
 )
 # DECISION LAYER
 decision = pnl.LCAMechanism(
     size=n_units,
     noise=pnl.UniformToNormalDist(standard_deviation=dec_noise_std).function,
+    name='DECISION'
 )
 
 #   LOGGING
@@ -106,7 +107,7 @@ comp.add_linear_processing_pathway([inp_task, proj_tc, hid_color])
 comp.add_linear_processing_pathway([inp_task, proj_tw, hid_word])
 comp.add_linear_processing_pathway([output, pnl.IDENTITY_MATRIX, decision])
 
-# comp.show_graph()
+comp.show_graph()
 
 """run the model
 """
