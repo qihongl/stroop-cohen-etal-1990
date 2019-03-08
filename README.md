@@ -1,6 +1,6 @@
 # stroop-pnlcomp, for neu/psy 330 spring 2019 
 
-this repo replicates cohen et al (1990) w/ psyneulink composition (version=0.5.0.0+100.g9f2c0030a)
+this repo replicates cohen et al (1990) w/ psyneulink composition (version==0.5.2.1)
 
 here's the model... 
 
