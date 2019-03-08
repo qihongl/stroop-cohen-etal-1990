@@ -4,28 +4,41 @@ import numpy as np
 import psyneulink as pnl
 import matplotlib.pyplot as plt
 import seaborn as sns
+from stroop_stimulus_util import get_stimulus, TASKS, COLORS
+
 sns.set(
     style='white', context='poster', palette="colorblind",
     font_scale=.8, rc={"lines.linewidth": 2},
 )
 
 # log path
-impath = '../imgs'
+impath = 'imgs'
 
 # constants
-conditions = ['control', 'conflict', 'congruent']
-tasks = ['color naming', 'word reading']
-colors = ['red', 'green']
-n_conditions = len(conditions)
-n_tasks = len(tasks)
-n_colors = len(colors)
+CONDITIONS = ['control', 'conflict', 'congruent']
+experiment_info = f"""
+stroop experiment info
+- all colors:\t {COLORS}
+- all words:\t {COLORS}
+- all tasks:\t {TASKS}
+- all conditions:\t {CONDITIONS}
+- image output path = {impath}
+"""
+print(experiment_info)
+
+
+# calculate meta-data
+n_conditions = len(CONDITIONS)
+n_tasks = len(TASKS)
+n_colors = len(COLORS)
 
 # model params
 n_units = 2
 hidden_func = pnl.Logistic(gain=1.0, x_0=4.0)
+dec_noise_std = .1
 unit_noise_std = 0.001
 integration_rate = 0.2
-dec_noise_std = .1
+
 
 # INPUT LAYER
 inp_color = pnl.TransferMechanism(
@@ -38,7 +51,7 @@ inp_word = pnl.TransferMechanism(
 inp_task = pnl.TransferMechanism(
     size=n_units, function=pnl.Linear, name='TASK'
 )
-#  HIDDEN LAYER
+# HIDDEN LAYER
 hid_color = pnl.TransferMechanism(
     size=n_units,
     function=hidden_func,
@@ -71,12 +84,12 @@ decision = pnl.LCAMechanism(
     name='DECISION'
 )
 
-#   LOGGING
+# LOGGING
 hid_color.set_log_conditions('value')
 hid_word.set_log_conditions('value')
 output.set_log_conditions('value')
 
-#  PROJECTIONS
+# PROJECTIONS, weights copied from cohen et al (1990)
 c_ih = pnl.MappingProjection(
     matrix=[[2.2, -2.2], [-2.2, 2.2]], name='COLOR INPUT TO HIDDEN')
 w_ih = pnl.MappingProjection(
@@ -90,7 +103,7 @@ proj_tc = pnl.MappingProjection(
 proj_tw = pnl.MappingProjection(
     matrix=[[0, 0], [4.0, 4.0]], name='WORD READING')
 
-# create a composition
+# build the model
 comp = pnl.Composition(name='STROOP model')
 comp.add_node(inp_color)
 comp.add_node(inp_word)
@@ -109,29 +122,93 @@ comp.add_linear_processing_pathway([output, pnl.IDENTITY_MATRIX, decision])
 
 comp.show_graph()
 
+"""define the inputs
+i.e. all CONDITIONS x TASKS for the experiment
+"""
+# the length of the stimulus sequence
+n_time_steps = 60
+
+# color naming - cong
+inputs_cn_con = get_stimulus(
+    inp_color, 'red', inp_word, 'red', inp_task, 'color naming', n_time_steps
+)
+# color naming - incong
+inputs_cn_cfl = get_stimulus(
+    inp_color, 'red', inp_word, 'green', inp_task, 'color naming', n_time_steps
+)
+# color naming - control
+inputs_cn_ctr = get_stimulus(
+    inp_color, 'red', inp_word, None, inp_task, 'color naming', n_time_steps
+)
+# word reading - cong
+inputs_wr_con = get_stimulus(
+    inp_color, 'red', inp_word, 'red', inp_task, 'word reading', n_time_steps
+)
+# word reading - incong
+inputs_wr_cfl = get_stimulus(
+    inp_color, 'green', inp_word, 'red', inp_task, 'word reading', n_time_steps
+)
+# word reading - control
+inputs_wr_ctr = get_stimulus(
+    inp_color, None, inp_word, 'red', inp_task, 'word reading', n_time_steps
+)
+
+
 """run the model
+test the model on all CONDITIONS x TASKS combinations
 """
 
 
 def run_model(n_stimuli, inputs, execution_id):
-
     acts = np.zeros((n_stimuli, n_time_steps, 2))
     for i in range(n_stimuli):
-        print(f'execution_id={execution_id}')
-        execution_id += 1
-        # run the model
+        # print(f'execution_id={execution_id}')
         comp.run(
             execution_id=execution_id,
             inputs=inputs,
             num_trials=n_time_steps,
             # termination_processing=termination_op
         )
+        execution_id += 1
         # log acts
         acts[i, :, :] = np.squeeze(comp.results)
     return acts, execution_id
 
 
-def compute_rt(act, threshold=.8):
+# run the model
+execution_id = 0
+n_stimuli = 50
+# preallocate
+cn_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
+wr_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_con]
+A_cn = {condition: None for condition in CONDITIONS}
+A_wr = {condition: None for condition in CONDITIONS}
+
+# run all conditions, color naming
+for i, condition in enumerate(CONDITIONS):
+    print(f'Color naming: {condition}')
+    A_cn[condition], execution_id = run_model(
+        n_stimuli, cn_input_list[i], execution_id)
+# run all conditions, word reading
+for i, condition in enumerate(CONDITIONS):
+    print(f'Word reading: {condition}')
+    A_wr[condition], execution_id = run_model(
+        n_stimuli, wr_input_list[i], execution_id)
+
+"""
+plot the reaction time for all CONDITIONS x TASKS
+want to recover fig 5 from cohen et al (1990)
+e.g. color naming red green is slower than word reading red green
+"""
+
+
+def compute_rt(act, threshold=.9):
+    """compute reaction time
+    take the activity of the decision layer...
+    check the earliest time point when activity > threshold...
+    call that RT
+    *RT=np.nan if timeout
+    """
     n_time_steps_, n_units_ = np.shape(act)
     rts = np.full(shape=(n_units_,), fill_value=np.nan)
     for i in range(n_units_):
@@ -141,74 +218,10 @@ def compute_rt(act, threshold=.8):
     return np.nanmin(rts)
 
 
-# data params
-n_time_steps = 50
-
-# color naming - cong
-inputs_cn_exp = {
-    inp_color: np.tile([1, 0], (n_time_steps, 1)),
-    inp_word: np.tile([1, 0], (n_time_steps, 1)),
-    inp_task: np.tile([1, 0], (n_time_steps, 1))
-}
-# color naming - incong
-inputs_cn_cfl = {
-    inp_color: np.tile([1, 0], (n_time_steps, 1)),
-    inp_word: np.tile([0, 1], (n_time_steps, 1)),
-    inp_task: np.tile([1, 0], (n_time_steps, 1))
-}
-# color naming - control
-inputs_cn_ctr = {
-    inp_color: np.tile([1, 0], (n_time_steps, 1)),
-    inp_word: np.tile([0, 0], (n_time_steps, 1)),
-    inp_task: np.tile([1, 0], (n_time_steps, 1))
-}
-# word reading - cong
-inputs_wr_exp = {
-    inp_color: np.tile([1, 0], (n_time_steps, 1)),
-    inp_word: np.tile([1, 0], (n_time_steps, 1)),
-    inp_task: np.tile([0, 1], (n_time_steps, 1))
-}
-# word reading - incong
-inputs_wr_cfl = {
-    inp_color: np.tile([0, 1], (n_time_steps, 1)),
-    inp_word: np.tile([1, 0], (n_time_steps, 1)),
-    inp_task: np.tile([0, 1], (n_time_steps, 1))
-}
-# word reading - control
-inputs_wr_ctr = {
-    inp_color: np.tile([0, 0], (n_time_steps, 1)),
-    inp_word: np.tile([1, 0], (n_time_steps, 1)),
-    inp_task: np.tile([0, 1], (n_time_steps, 1))
-}
-
-# run the model
-execution_id = 0
-n_stimuli = 50
-
-cn_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_exp]
-wr_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_exp]
-
-A_cn = {condition: None for condition in conditions}
-A_wr = {condition: None for condition in conditions}
-
-for i, condition in enumerate(conditions):
-    print('Color naming: ', condition)
-    A_cn[condition], execution_id = run_model(
-        n_stimuli, cn_input_list[i], execution_id)
-
-for i, condition in enumerate(conditions):
-    print('Word reading: ', condition)
-    A_wr[condition], execution_id = run_model(
-        n_stimuli, wr_input_list[i], execution_id)
-
-"""
-plot the reaction time for all conditions x tasks
-"""
-
-# compute RTs
-RTs_cn = {condition: None for condition in conditions}
-RTs_wr = {condition: None for condition in conditions}
-for i, condition in enumerate(conditions):
+# compute RTs for color naming and word reading
+RTs_cn = {condition: None for condition in CONDITIONS}
+RTs_wr = {condition: None for condition in CONDITIONS}
+for i, condition in enumerate(CONDITIONS):
     RTs_cn[condition] = np.array(
         [compute_rt(A_cn[condition][i, :, :])for i in range(n_stimuli)]
     )
@@ -216,19 +229,21 @@ for i, condition in enumerate(conditions):
         [compute_rt(A_wr[condition][i, :, :])for i in range(n_stimuli)]
     )
 
-# org data for plotting
-mean_rt_cn = [np.nanmean(RTs_cn[condition]) for condition in conditions]
-mean_rt_wr = [np.nanmean(RTs_wr[condition]) for condition in conditions]
-std_rt_cn = [np.nanstd(RTs_cn[condition]) for condition in conditions]
-std_rt_wr = [np.nanstd(RTs_wr[condition]) for condition in conditions]
-xtick_vals = range(len(conditions))
+# org data for plotting, color naming and word reading
+mean_rt_cn = [np.nanmean(RTs_cn[condition]) for condition in CONDITIONS]
+mean_rt_wr = [np.nanmean(RTs_wr[condition]) for condition in CONDITIONS]
+std_rt_cn = [np.nanstd(RTs_cn[condition]) for condition in CONDITIONS]
+std_rt_wr = [np.nanstd(RTs_wr[condition]) for condition in CONDITIONS]
+xtick_vals = range(len(CONDITIONS))
 
 # plot RT
 f, ax = plt.subplots(1, 1, figsize=(6, 6))
 ax.errorbar(
-    x=xtick_vals, y=mean_rt_cn, yerr=std_rt_cn, label='color naming')
+    x=xtick_vals, y=mean_rt_cn, yerr=std_rt_cn, label='color naming'
+)
 ax.errorbar(
-    x=xtick_vals, y=mean_rt_wr, yerr=std_rt_wr, label='word reading')
+    x=xtick_vals, y=mean_rt_wr, yerr=std_rt_wr, label='word reading'
+)
 
 # ax.plot(
 #     xtick_vals, mean_rt_cn, label='color naming')
@@ -238,7 +253,7 @@ ax.errorbar(
 # ax.set_ylim([None, n_time_steps])
 ax.set_ylabel('Reaction time (n cycles)')
 ax.set_xticks(xtick_vals)
-ax.set_xticklabels(conditions)
+ax.set_xticklabels(CONDITIONS)
 ax.set_xlabel('Condition')
 ax.set_title('RT under various conditions')
 f.legend(frameon=False, bbox_to_anchor=(1, .9))
@@ -249,17 +264,22 @@ sns.despine()
 fname = f'stroop_ir{integration_rate}.png'
 f.savefig(os.path.join(impath, fname))
 
+
 """
-inspect hidden activity time course
+inspect the hidden layer activity time course
 """
 
 
 def get_log_values(condition_indices):
-    """get the hidden layer activity, given the execution ids"""
+    """
+    get the hidden layer activity, given the execution ids
+    """
+    # word hidden layer
     hw_acts = np.array([
         np.squeeze(hid_word.log.nparray_dictionary()[ei]['value'])
         for ei in condition_indices
     ])
+    # color hidden layer
     hc_acts = np.array([
         np.squeeze(hid_color.log.nparray_dictionary()[ei]['value'])
         for ei in condition_indices
@@ -268,11 +288,13 @@ def get_log_values(condition_indices):
 
 
 def get_cond_ids(condition_index, task_index):
-    """get indices/execution ids given the condition & task indices"""
+    """
+    get indices/execution ids given the condition & task indices
+    """
     c_ = condition_index
     t_ = task_index
     condition_indices_shift = (t_ * n_conditions + c_) * n_stimuli
-    condition_indices = np.arange(1, n_stimuli, 1) + condition_indices_shift
+    condition_indices = np.arange(n_stimuli) + condition_indices_shift
     return condition_indices
 
 
@@ -280,47 +302,47 @@ def get_cond_ids(condition_index, task_index):
 hid_color_logvals = hid_color.log.get_logged_entries()['value']
 hid_word_logvals = hid_word.log.get_logged_entries()['value']
 
-# prep colors
+# prep colorblind_colors for plotting
 cb_r = sns.color_palette('colorblind', n_colors=4)[3]
 cb_g = sns.color_palette('colorblind', n_colors=4)[2]
 colors_plt = [cb_r, cb_g]
+n_stds = 3
 
-# # i is indexing the condition
-# c_i = 1
-# # j is indexing the task
-# c_j = 0
-
-for c_i, c_j in product(range(n_conditions), range(n_tasks)):
+# for all tasks x conditions x hidden layers...
+# plot the activity for red/green unit
+for c_i, t_j in product(range(n_conditions), range(n_tasks)):
     # fetch the ex ids for that condition x task combo
-    condition_indices = get_cond_ids(c_i, c_j)
+    condition_indices = get_cond_ids(c_i, t_j)
     hw_acts, hc_acts = get_log_values(condition_indices)
-
     # plot
     f, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
-
+    # loop over the red/green units, color layer
     for i in range(n_units):
         mean_ = np.mean(hc_acts[:, :, i], axis=0)
         std_ = np.std(hc_acts[:, :, i], axis=0)
-        # axes[0].plot(mean_)
         axes[0].errorbar(
-            x=range(n_time_steps), y=mean_, yerr=std_, color=colors_plt[i])
+            x=range(n_time_steps), y=mean_, yerr=std_*n_stds,
+            color=colors_plt[i]
+        )
+    # loop over the red/green units, word layer
     for i in range(n_units):
         mean_ = np.mean(hw_acts[:, :, i], axis=0)
         std_ = np.std(hw_acts[:, :, i], axis=0)
-        # axes[1].plot(mean_)
         axes[1].errorbar(
-            x=range(n_time_steps), y=mean_, yerr=std_, color=colors_plt[i])
-
+            x=range(n_time_steps), y=mean_, yerr=std_*n_stds,
+            color=colors_plt[i]
+        )
+    # mark the plot
     for i, ax in enumerate(axes):
-        ax.set_ylabel(f'Activity, {tasks[i]}')
+        ax.set_ylabel(f'Activity, {TASKS[i]}')
         ax.set_ylim([-.05, 1.05])
     axes[-1].set_xlabel('time ticks')
-    axes[0].set_title(f'red trials, {tasks[c_j]}, {conditions[c_i]}')
+    axes[0].set_title(f'red trials, {TASKS[t_j]}, {CONDITIONS[c_i]}')
 
     sns.despine()
     f.legend(frameon=False, bbox_to_anchor=(1, .4))
     f.tight_layout()
 
     # save fig
-    fname = f'h_{conditions[c_i]}_{tasks[c_j]}.png'
+    fname = f'h_{CONDITIONS[c_i]}_{TASKS[t_j]}.png'
     f.savefig(os.path.join(impath, fname))
