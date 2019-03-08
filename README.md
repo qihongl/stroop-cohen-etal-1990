@@ -12,7 +12,7 @@ here's the main result, meant to qualitatively replicate fig 5 from cohen et al 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/stroop_0.2.png" alt="model" height=350px>
 
 
-here's another way to plot the data, i'm doing kernel density estimates of the reaction time distributions.  
+here's another way to plot the data. these are kernel density estimates of the reaction time distributions.  
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/rt_kde.png" alt="model" height=450px>
 
