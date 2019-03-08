@@ -266,6 +266,36 @@ sns.despine()
 fname = f'stroop_ir{integration_rate}.png'
 f.savefig(os.path.join(impath, fname))
 
+"""
+RT distribution
+"""
+
+f, axes = plt.subplots(n_tasks, 1, figsize=(7, 8), sharex=True, sharey=True,)
+
+for i, condition in enumerate(CONDITIONS):
+    temp = sns.kdeplot(
+        RTs_cn[condition][~np.isnan(RTs_cn[condition])],
+        shade=True,
+        ax=axes[0]
+    )
+for i, condition in enumerate(CONDITIONS):
+    sns.kdeplot(
+        RTs_wr[condition][~np.isnan(RTs_wr[condition])],
+        shade=True,
+        ax=axes[1]
+    )
+    axes[0].legend(CONDITIONS, frameon=False)
+
+for i, ax in enumerate(axes):
+    ax.set_ylabel('Probability, KDE')
+    ax.set_title(f'RT distribution, {TASKS[i]}')
+axes[1].set_xlabel('Reaction time')
+sns.despine()
+f.tight_layout()
+
+# save fig
+fname = f'rt_kde.png'
+f.savefig(os.path.join(impath, fname))
 
 """
 inspect the hidden layer activity time course
