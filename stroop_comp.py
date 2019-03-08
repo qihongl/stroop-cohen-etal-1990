@@ -12,7 +12,9 @@ sns.set(
 )
 
 # log path
-impath = 'imgs'
+impath = 'imgs_temp'
+if not os.path.exists(impath):
+    os.makedirs(impath)
 
 # constants
 CONDITIONS = ['control', 'conflict', 'congruent']
@@ -186,12 +188,12 @@ A_wr = {condition: None for condition in CONDITIONS}
 
 # run all conditions, color naming
 for i, condition in enumerate(CONDITIONS):
-    print(f'Color naming: {condition}')
+    print(f'running color naming: {condition}...')
     A_cn[condition], execution_id = run_model(
         n_stimuli, cn_input_list[i], execution_id)
 # run all conditions, word reading
 for i, condition in enumerate(CONDITIONS):
-    print(f'Word reading: {condition}')
+    print(f'running word reading: {condition}...')
     A_wr[condition], execution_id = run_model(
         n_stimuli, wr_input_list[i], execution_id)
 
