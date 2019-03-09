@@ -27,4 +27,4 @@ References:
 and most importantly,
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/blob/master/Scripts/Examples/Stroop%20Basic.py">this</a> 
 and 
-<a href="https://github.com/PrincetonUniversity/PsyNeuLink/tree/master/Scripts">this</a>
+<a href="https://github.com/PrincetonUniversity/PsyNeuLink/blob/master/Scripts/Laura%20Stroop.py">this</a>
