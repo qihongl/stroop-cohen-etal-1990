@@ -1,8 +1,13 @@
+"""stimuli utility funcs for the stroop experiment
+assume red is the "dominant color"
+- which should be okay since stroop task is symmetric w.r.t to color
+"""
 import numpy as np
 
 # constants
-TASKS = ['color naming', 'word reading']
 COLORS = ['red', 'green']
+TASKS = ['color naming', 'word reading']
+CONDITIONS = ['control', 'conflict', 'congruent']
 
 # input check
 n_tasks = len(TASKS)
@@ -43,11 +48,7 @@ def get_task_rep(task):
 
 def compute_delays(SOA):
     """ calculate the delay time for color/word input
-    positive SOA => word is presented earlier, v.v.
-    for example, if...
-    - color presented starting from 0ms
-    - word  presented starting from 100ms
-    - SOA == -100 < 0 => color presented earlier <=> delay word presentation
+    positive SOA => color is presented earlier, v.v.
 
     Parameters
     ----------
@@ -60,8 +61,8 @@ def compute_delays(SOA):
         the delay time for color/word input, repsectively
 
     """
-    color_delay = max(0, abs(SOA))
-    word_delay = abs(min(0, SOA))
+    color_delay = max(0, -SOA)
+    word_delay = max(0, SOA)
     return color_delay, word_delay
 
 
@@ -75,7 +76,7 @@ def get_stimulus(
 
     Parameters
     ----------
-    color/word/task_input_layer : pnl.TransferMechanism
+    color/word/task_input_layer: pnl.TransferMechanism
         the input layer PNL object
     color/word/task : str
         an element in COLORS/COLORS/TASKS
@@ -100,6 +101,7 @@ def get_stimulus(
         color_delay, word_delay = compute_delays(SOA)
         color_stimulus[:color_delay, :] = 0
         word_stimulus[:word_delay, :] = 0
+        task_stimulus[:abs(SOA), :] = 0
     # form the input dict
     input_dict = {
         color_input_layer: color_stimulus,
@@ -109,30 +111,61 @@ def get_stimulus(
     return input_dict
 
 
-# def get_stimulus_(
-#     color_input_layer, color,
-#     word_input_layer, word,
-#     task_input_layer, task,
-#     n_time_steps
-# ):
-#     """get a stroop stimulus
-#
-#     Parameters
-#     ----------
-#     color/word/task_input_layer : pnl.TransferMechanism
-#         the input layer PNL object
-#     color/word/task : str
-#         an element in COLORS/COLORS/TASKS
-#     n_time_steps: int
-#         the stimuli sequence length
-#
-#     Returns
-#     -------
-#     dict, as requested by PNL composition
-#         a representation of the input sitmuli sequence
-#
-#     """
-#     layers = [color_input_layer, word_input_layer, task_input_layer]
-#     stimulus_ = [get_color_rep(color), get_word_rep(word), get_task_rep(task)]
-#     stimulus = [np.tile(s_, (n_time_steps, 1)) for s_ in stimulus_]
-#     return dict(zip(layers, stimulus))
+def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
+    """Short summary.
+
+    Parameters
+    ----------
+    color/word/task_input_layer: pnl.TransferMechanism
+        the input layer PNL object
+    n_time_steps : type
+        Description of parameter `n_time_steps`.
+    SOA : type
+        Description of parameter `SOA`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    # color naming - congruent
+    inputs_cn_con = get_stimulus(
+        inp_color, 'red', inp_word, 'red', inp_task, 'color naming',
+        n_time_steps, SOA
+    )
+    # color naming - incongruent
+    inputs_cn_cfl = get_stimulus(
+        inp_color, 'red', inp_word, 'green', inp_task, 'color naming',
+        n_time_steps, SOA
+    )
+    # color naming - control
+    inputs_cn_ctr = get_stimulus(
+        inp_color, 'red', inp_word, None, inp_task, 'color naming',
+        n_time_steps, SOA
+    )
+    # word reading - congruent
+    inputs_wr_con = get_stimulus(
+        inp_color, 'red', inp_word, 'red', inp_task, 'word reading',
+        n_time_steps, SOA
+    )
+    # word reading - incongruent
+    inputs_wr_cfl = get_stimulus(
+        inp_color, 'green', inp_word, 'red', inp_task, 'word reading',
+        n_time_steps, SOA
+    )
+    # word reading - control
+    inputs_wr_ctr = get_stimulus(
+        inp_color, None, inp_word, 'red', inp_task, 'word reading',
+        n_time_steps, SOA
+    )
+    # combine the stimuli to lists
+    color_naming_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
+    word_reading_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_con]
+    # pack to dictionaries
+    color_naming_input_dict = dict(zip(CONDITIONS, color_naming_input_list))
+    word_reading_input_dict = dict(zip(CONDITIONS, word_reading_input_list))
+    all_input_dict = dict(
+        zip(TASKS, [color_naming_input_dict, word_reading_input_dict])
+    )
+    return all_input_dict

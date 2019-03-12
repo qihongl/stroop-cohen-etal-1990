@@ -1,10 +1,10 @@
-from itertools import product
 import os
 import numpy as np
-import psyneulink as pnl
 import matplotlib.pyplot as plt
 import seaborn as sns
-from stroop_stimulus_util import get_stimulus, TASKS, COLORS
+from itertools import product
+from stroop_model import get_stroop_model, N_UNITS
+from stroop_stimulus_util import get_stimulus, TASKS, COLORS, CONDITIONS
 
 sns.set(
     style='white', context='poster', palette="colorblind",
@@ -17,7 +17,6 @@ if not os.path.exists(impath):
     os.makedirs(impath)
 
 # constants
-CONDITIONS = ['control', 'conflict', 'congruent']
 experiment_info = f"""
 stroop experiment info
 - all colors:\t {COLORS}
@@ -28,107 +27,25 @@ stroop experiment info
 """
 print(experiment_info)
 
-
-# calculate meta-data
+# calculate experiment metadata
 n_conditions = len(CONDITIONS)
 n_tasks = len(TASKS)
 n_colors = len(COLORS)
 
-# model params
-n_units = 2
-hidden_func = pnl.Logistic(gain=1.0, x_0=4.0)
-dec_noise_std = .1
-unit_noise_std = 0.001
-integration_rate = 0.2
+"""
+get the stroop model
+"""
+model, nodes, model_metadata = get_stroop_model()
+[integration_rate, dec_noise_std, unit_noise_std] = model_metadata
+[inp_color, inp_word, inp_task, hid_color, hid_word, output, decision] = nodes
 
-
-# INPUT LAYER
-inp_color = pnl.TransferMechanism(
-    size=n_units, function=pnl.Linear, name='COLOR INPUT'
-)
-inp_word = pnl.TransferMechanism(
-    size=n_units, function=pnl.Linear, name='WORD INPUT'
-)
-# TASK LAYER
-inp_task = pnl.TransferMechanism(
-    size=n_units, function=pnl.Linear, name='TASK'
-)
-# HIDDEN LAYER
-hid_color = pnl.TransferMechanism(
-    size=n_units,
-    function=hidden_func,
-    integrator_mode=True,
-    integration_rate=integration_rate,
-    noise=pnl.NormalDist(standard_deviation=unit_noise_std).function,
-    name='COLORS HIDDEN')
-
-hid_word = pnl.TransferMechanism(
-    size=n_units,
-    function=hidden_func,
-    integrator_mode=True,
-    integration_rate=integration_rate,
-    noise=pnl.NormalDist(standard_deviation=unit_noise_std).function,
-    name='WORDS HIDDEN'
-)
-# OUTPUT LAYER
-output = pnl.TransferMechanism(
-    size=n_units,
-    function=pnl.Logistic,
-    integrator_mode=True,
-    integration_rate=integration_rate,
-    noise=pnl.NormalDist(standard_deviation=unit_noise_std).function,
-    name='OUTPUT'
-)
-# DECISION LAYER
-decision = pnl.LCAMechanism(
-    size=n_units,
-    noise=pnl.UniformToNormalDist(standard_deviation=dec_noise_std).function,
-    name='DECISION'
-)
-
-# LOGGING
-hid_color.set_log_conditions('value')
-hid_word.set_log_conditions('value')
-output.set_log_conditions('value')
-
-# PROJECTIONS, weights copied from cohen et al (1990)
-c_ih = pnl.MappingProjection(
-    matrix=[[2.2, -2.2], [-2.2, 2.2]], name='COLOR INPUT TO HIDDEN')
-w_ih = pnl.MappingProjection(
-    matrix=[[2.6, -2.6], [-2.6, 2.6]], name='WORD INPUT TO HIDDEN')
-c_ho = pnl.MappingProjection(
-    matrix=[[1.3, -1.3], [-1.3, 1.3]], name='COLOR HIDDEN TO OUTPUT')
-w_ho = pnl.MappingProjection(
-    matrix=[[2.5, -2.5], [-2.5, 2.5]], name='WORD HIDDEN TO OUTPUT')
-proj_tc = pnl.MappingProjection(
-    matrix=[[4.0, 4.0], [0, 0]], name='COLOR NAMING')
-proj_tw = pnl.MappingProjection(
-    matrix=[[0, 0], [4.0, 4.0]], name='WORD READING')
-
-# build the model
-comp = pnl.Composition(name='STROOP model')
-comp.add_node(inp_color)
-comp.add_node(inp_word)
-comp.add_node(hid_color)
-comp.add_node(hid_word)
-comp.add_node(inp_task)
-comp.add_node(output)
-comp.add_node(decision)
-comp.add_linear_processing_pathway([inp_color, c_ih, hid_color])
-comp.add_linear_processing_pathway([inp_word, w_ih, hid_word])
-comp.add_linear_processing_pathway([hid_color, c_ho, output])
-comp.add_linear_processing_pathway([hid_word, w_ho, output])
-comp.add_linear_processing_pathway([inp_task, proj_tc, hid_color])
-comp.add_linear_processing_pathway([inp_task, proj_tw, hid_word])
-comp.add_linear_processing_pathway([output, pnl.IDENTITY_MATRIX, decision])
-
-comp.show_graph()
+# model.show_graph()
 
 """define the inputs
 i.e. all CONDITIONS x TASKS for the experiment
 """
 # the length of the stimulus sequence
-n_time_steps = 60
+n_time_steps = 80
 
 # color naming - cong
 inputs_cn_con = get_stimulus(
@@ -155,17 +72,16 @@ inputs_wr_ctr = get_stimulus(
     inp_color, None, inp_word, 'red', inp_task, 'word reading', n_time_steps
 )
 
-
 """run the model
 test the model on all CONDITIONS x TASKS combinations
 """
 
 
-def run_model(n_stimuli, inputs, execution_id):
-    acts = np.zeros((n_stimuli, n_time_steps, 2))
-    for i in range(n_stimuli):
+def run_model(n_repeats, inputs, execution_id):
+    acts = np.zeros((n_repeats, n_time_steps, N_UNITS))
+    for i in range(n_repeats):
         # print(f'execution_id={execution_id}')
-        comp.run(
+        model.run(
             execution_id=execution_id,
             inputs=inputs,
             num_trials=n_time_steps,
@@ -173,13 +89,13 @@ def run_model(n_stimuli, inputs, execution_id):
         )
         execution_id += 1
         # log acts
-        acts[i, :, :] = np.squeeze(comp.results)
+        acts[i, :, :] = np.squeeze(model.results)
     return acts, execution_id
 
 
 # run the model
 execution_id = 0
-n_stimuli = 50
+n_repeats = 50
 # preallocate
 cn_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
 wr_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_con]
@@ -190,12 +106,14 @@ A_wr = {condition: None for condition in CONDITIONS}
 for i, condition in enumerate(CONDITIONS):
     print(f'running color naming: {condition}...')
     A_cn[condition], execution_id = run_model(
-        n_stimuli, cn_input_list[i], execution_id)
+        n_repeats, cn_input_list[i], execution_id
+    )
 # run all conditions, word reading
 for i, condition in enumerate(CONDITIONS):
     print(f'running word reading: {condition}...')
     A_wr[condition], execution_id = run_model(
-        n_stimuli, wr_input_list[i], execution_id)
+        n_repeats, wr_input_list[i], execution_id
+    )
 
 """
 plot the reaction time for all CONDITIONS x TASKS
@@ -211,9 +129,9 @@ def compute_rt(act, threshold=.9):
     call that RT
     *RT=np.nan if timeout
     """
-    n_time_steps_, n_units_ = np.shape(act)
-    rts = np.full(shape=(n_units_,), fill_value=np.nan)
-    for i in range(n_units_):
+    n_time_steps_, N_UNITS_ = np.shape(act)
+    rts = np.full(shape=(N_UNITS_,), fill_value=np.nan)
+    for i in range(N_UNITS_):
         tps_pass_threshold = np.where(act[:, i] > threshold)[0]
         if len(tps_pass_threshold) > 0:
             rts[i] = tps_pass_threshold[0]
@@ -225,10 +143,10 @@ RTs_cn = {condition: None for condition in CONDITIONS}
 RTs_wr = {condition: None for condition in CONDITIONS}
 for i, condition in enumerate(CONDITIONS):
     RTs_cn[condition] = np.array(
-        [compute_rt(A_cn[condition][i, :, :])for i in range(n_stimuli)]
+        [compute_rt(A_cn[condition][i, :, :])for i in range(n_repeats)]
     )
     RTs_wr[condition] = np.array(
-        [compute_rt(A_wr[condition][i, :, :])for i in range(n_stimuli)]
+        [compute_rt(A_wr[condition][i, :, :])for i in range(n_repeats)]
     )
 
 # org data for plotting, color naming and word reading
@@ -246,13 +164,11 @@ ax.errorbar(
 ax.errorbar(
     x=xtick_vals, y=mean_rt_wr, yerr=std_rt_wr, label='word reading'
 )
-
 # ax.plot(
 #     xtick_vals, mean_rt_cn, label='color naming')
 # ax.plot(
 #     xtick_vals, mean_rt_wr, label='word reading')
 
-# ax.set_ylim([None, n_time_steps])
 ax.set_ylabel('Reaction time (n cycles)')
 ax.set_xticks(xtick_vals)
 ax.set_xticklabels(CONDITIONS)
@@ -270,7 +186,7 @@ f.savefig(os.path.join(impath, fname))
 RT distribution
 """
 
-f, axes = plt.subplots(n_tasks, 1, figsize=(7, 8), sharex=True, sharey=True,)
+f, axes = plt.subplots(n_tasks, 1, figsize=(10, 8), sharex=True, sharey=True,)
 
 for i, condition in enumerate(CONDITIONS):
     temp = sns.kdeplot(
@@ -325,8 +241,8 @@ def get_cond_ids(condition_index, task_index):
     """
     c_ = condition_index
     t_ = task_index
-    condition_indices_shift = (t_ * n_conditions + c_) * n_stimuli
-    condition_indices = np.arange(n_stimuli) + condition_indices_shift
+    condition_indices_shift = (t_ * n_conditions + c_) * n_repeats
+    condition_indices = np.arange(n_repeats) + condition_indices_shift
     return condition_indices
 
 
@@ -349,7 +265,7 @@ for c_i, t_j in product(range(n_conditions), range(n_tasks)):
     # plot
     f, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
     # loop over the red/green units, color layer
-    for i in range(n_units):
+    for i in range(N_UNITS):
         mean_ = np.mean(hc_acts[:, :, i], axis=0)
         std_ = np.std(hc_acts[:, :, i], axis=0)
         axes[0].errorbar(
@@ -357,7 +273,7 @@ for c_i, t_j in product(range(n_conditions), range(n_tasks)):
             color=colors_plt[i]
         )
     # loop over the red/green units, word layer
-    for i in range(n_units):
+    for i in range(N_UNITS):
         mean_ = np.mean(hw_acts[:, :, i], axis=0)
         std_ = np.std(hw_acts[:, :, i], axis=0)
         axes[1].errorbar(
