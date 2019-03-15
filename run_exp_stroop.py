@@ -10,6 +10,7 @@ sns.set(
     style='white', context='poster', palette="colorblind",
     font_scale=.8, rc={"lines.linewidth": 2},
 )
+np.random.seed(0)
 
 # log path
 impath = 'imgs_temp'
@@ -36,16 +37,15 @@ n_colors = len(COLORS)
 get the stroop model
 """
 model, nodes, model_metadata = get_stroop_model()
-[integration_rate, dec_noise_std, unit_noise_std] = model_metadata
 [inp_color, inp_word, inp_task, hid_color, hid_word, output, decision] = nodes
-
+[integration_rate, dec_noise_std, unit_noise_std] = model_metadata
 # model.show_graph()
 
 """define the inputs
 i.e. all CONDITIONS x TASKS for the experiment
 """
 # the length of the stimulus sequence
-n_time_steps = 80
+n_time_steps = 100
 
 # color naming - cong
 inputs_cn_con = get_stimulus(
@@ -95,7 +95,7 @@ def run_model(n_repeats, inputs, execution_id):
 
 # run the model
 execution_id = 0
-n_repeats = 50
+n_repeats = 40
 # preallocate
 cn_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
 wr_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_con]
@@ -139,14 +139,17 @@ def compute_rt(act, threshold=.9):
 
 
 # compute RTs for color naming and word reading
+threshold = .9
 RTs_cn = {condition: None for condition in CONDITIONS}
 RTs_wr = {condition: None for condition in CONDITIONS}
 for i, condition in enumerate(CONDITIONS):
     RTs_cn[condition] = np.array(
-        [compute_rt(A_cn[condition][i, :, :])for i in range(n_repeats)]
+        [compute_rt(A_cn[condition][i, :, :], threshold)
+         for i in range(n_repeats)]
     )
     RTs_wr[condition] = np.array(
-        [compute_rt(A_wr[condition][i, :, :])for i in range(n_repeats)]
+        [compute_rt(A_wr[condition][i, :, :], threshold)
+         for i in range(n_repeats)]
     )
 
 # org data for plotting, color naming and word reading

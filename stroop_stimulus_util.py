@@ -70,7 +70,7 @@ def get_stimulus(
     color_input_layer, color,
     word_input_layer, word,
     task_input_layer, task,
-    n_time_steps, SOA=0
+    n_time_steps, SOA=0,
 ):
     """get a stroop stimulus
 
@@ -101,7 +101,7 @@ def get_stimulus(
         color_delay, word_delay = compute_delays(SOA)
         color_stimulus[:color_delay, :] = 0
         word_stimulus[:word_delay, :] = 0
-        task_stimulus[:abs(SOA), :] = 0
+        # task_stimulus[:abs(SOA), :] = 0
     # form the input dict
     input_dict = {
         color_input_layer: color_stimulus,

@@ -1,16 +1,24 @@
+"""replicate the stroop model from cohen et al (1990)
+clr = color, wrd = word
+i = input, h = hidden, o = output
+tc/tw = mapping from taks input to color naming / word reading
+"""
 import psyneulink as pnl
 
 # CONSTANTS
 N_UNITS = 2
 
-# model params
-hidden_func = pnl.Logistic(gain=1.0, x_0=4.0)
-dec_noise_std = .1
-unit_noise_std = 0.001
-integration_rate = 0.2
-
 
 def get_stroop_model():
+    # model params
+    # TODO bad practice, to be moved
+    hidden_func = pnl.Logistic(gain=1.0, x_0=4.0)
+    unit_noise_std = .01
+    dec_noise_std = .1
+    integration_rate = .2
+    leak = 0
+    competition = 1
+    # lca_mvn = [0, 1]
     # input layer, color and word
     inp_clr = pnl.TransferMechanism(
         size=N_UNITS, function=pnl.Linear, name='COLOR INPUT'
@@ -51,15 +59,15 @@ def get_stroop_model():
     # decision layer, some accumulator
     decision = pnl.LCAMechanism(
         size=N_UNITS,
+        leak=leak,
+        competition=competition,
+        # MAX_VS_NEXT=lca_mvn,
         noise=pnl.UniformToNormalDist(
             standard_deviation=dec_noise_std).function,
         name='DECISION'
     )
 
     # PROJECTIONS, weights copied from cohen et al (1990)
-    # clr = color, wrd = word
-    # i = input, h = hidden, o = output
-    # tc/tw = mapping from taks input to color naming / word reading
     wts_clr_ih = pnl.MappingProjection(
         matrix=[[2.2, -2.2], [-2.2, 2.2]], name='COLOR INPUT TO HIDDEN')
     wts_wrd_ih = pnl.MappingProjection(
