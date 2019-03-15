@@ -112,21 +112,24 @@ def get_stimulus(
 
 
 def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
-    """Short summary.
+    """get stimuli for all task x condition combination with some SOA
 
     Parameters
     ----------
     color/word/task_input_layer: pnl.TransferMechanism
         the input layer PNL object
-    n_time_steps : type
-        Description of parameter `n_time_steps`.
-    SOA : type
-        Description of parameter `SOA`.
+    n_time_steps: int
+        the stimuli sequence length
+    SOA: int
+        stimulus onset asynchrony; see compute_delays()
 
     Returns
     -------
-    type
-        Description of returned object.
+    hierarchical dict
+    - level 1:  key: tasks        val: stimuli for all conditions
+    - level 2:  key: condition    val: a stimulus
+
+
 
     """
     # color naming - congruent
