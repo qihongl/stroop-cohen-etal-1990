@@ -32,6 +32,7 @@ def compute_rt_(act, threshold):
 
 # save the record file
 log_path = 'log_temp'
+img_path = 'imgs_temp'
 
 # experiment params
 SOAs = [-10, -5, 0, 5, 10]
@@ -120,3 +121,5 @@ ax.set_ylabel('Reaction time')
 ax.set_xlabel('Stimulus onset asynchrony (SOA)')
 f.tight_layout()
 sns.despine()
+
+f.savefig(os.path.join(img_path, 'soa.png'))
