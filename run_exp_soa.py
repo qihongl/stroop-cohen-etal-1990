@@ -1,3 +1,6 @@
+"""
+run the SOA experiment and save the neural activity
+"""
 import os
 import numpy as np
 import pandas as pd

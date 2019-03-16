@@ -1,3 +1,6 @@
+"""
+run the classic stroop experiment, analyze the data, plot/save the figures 
+"""
 import os
 import numpy as np
 import matplotlib.pyplot as plt

@@ -1,3 +1,7 @@
+"""
+take some previously save the neural activity for SOA (from run_exp_soa.py),
+and plot/save the SOA figure
+"""
 import os
 import numpy as np
 import pandas as pd
