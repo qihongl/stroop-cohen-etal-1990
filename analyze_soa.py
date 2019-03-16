@@ -35,7 +35,7 @@ log_path = 'log_temp'
 img_path = 'imgs_temp'
 
 # experiment params
-SOAs = [-10, -5, 0, 5, 10]
+SOAs = [-10, 0, 10]
 n_time_steps = 120
 n_repeats = 20
 
@@ -59,6 +59,7 @@ for SOA in SOAs:
             # define the current selection operator
             sel_op = (record['SOA'] == SOA) & (record['Task'] == task) & (
                 record['Condition'] == condition)
+
             # the record for the current SOA / task / condition
             record_stc = record[sel_op]
             # loop over all repeats
@@ -76,11 +77,11 @@ for SOA in SOAs:
                 if task == 'word reading':
                     soa = -SOA
                     if soa < 0:
-                        rt_stci -= abs(soa)
+                        rt_stci -= np.abs(soa)
                 elif task == 'color naming':
                     soa = SOA
                     if soa < 0:
-                        rt_stci -= abs(soa)
+                        rt_stci -= np.abs(soa)
                 else:
                     raise ValueError('Unrecognizable task')
 
@@ -102,7 +103,7 @@ sns.set(
     rc={'legend.frameon': False},
 )
 
-f, ax = plt.subplots(1, 1, figsize=(9, 5))
+f, ax = plt.subplots(1, 1, figsize=(8, 5))
 
 sns.lineplot(
     x='SOA', y='RT',
@@ -122,4 +123,4 @@ ax.set_xlabel('Stimulus onset asynchrony (SOA)')
 f.tight_layout()
 sns.despine()
 
-f.savefig(os.path.join(img_path, 'soa.png'))
+# f.savefig(os.path.join(img_path, 'soa.png'))

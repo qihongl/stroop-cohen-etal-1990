@@ -71,7 +71,7 @@ def run_model(inputs, n_repeats, execution_id, record):
 
 
 # run the model with certain SOA
-SOAs = [-10, -5, 0, 5, 10]
+SOAs = [-10, 0, 10]
 n_time_steps = 120
 n_repeats = 20
 

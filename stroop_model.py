@@ -66,7 +66,6 @@ def get_stroop_model():
             standard_deviation=dec_noise_std).function,
         name='DECISION'
     )
-
     # PROJECTIONS, weights copied from cohen et al (1990)
     wts_clr_ih = pnl.MappingProjection(
         matrix=[[2.2, -2.2], [-2.2, 2.2]], name='COLOR INPUT TO HIDDEN')
@@ -80,7 +79,6 @@ def get_stroop_model():
         matrix=[[4.0, 4.0], [0, 0]], name='COLOR NAMING')
     wts_tw = pnl.MappingProjection(
         matrix=[[0, 0], [4.0, 4.0]], name='WORD READING')
-
     # build the model
     model = pnl.Composition(name='STROOP model')
     model.add_node(inp_clr)
@@ -97,7 +95,6 @@ def get_stroop_model():
     model.add_linear_processing_pathway([inp_task, wts_tc, hid_clr])
     model.add_linear_processing_pathway([inp_task, wts_tw, hid_wrd])
     model.add_linear_processing_pathway([output, pnl.IDENTITY_MATRIX, decision])
-
     # LOGGING
     hid_clr.set_log_conditions('value')
     hid_wrd.set_log_conditions('value')
