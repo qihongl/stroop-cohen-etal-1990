@@ -128,9 +128,6 @@ def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
     hierarchical dict
     - level 1:  key: tasks        val: stimuli for all conditions
     - level 2:  key: condition    val: a stimulus
-
-
-
     """
     # color naming - congruent
     inputs_cn_con = get_stimulus(

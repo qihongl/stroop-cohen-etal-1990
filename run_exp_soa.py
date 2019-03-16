@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pandas as pd
 from stroop_model import get_stroop_model
-from stroop_stimulus_util import get_stimulus_set
-from stroop_stimulus_util import TASKS, COLORS, CONDITIONS
+from stroop_stimulus import get_stimulus_set
+from stroop_stimulus import TASKS, COLORS, CONDITIONS
 
 # log path
 log_path = 'log_temp'

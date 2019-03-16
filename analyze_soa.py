@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from stroop_stimulus_util import TASKS, CONDITIONS
+from stroop_stimulus import TASKS, CONDITIONS
 
 """helper funcs
 """

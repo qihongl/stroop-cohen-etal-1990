@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from itertools import product
 from stroop_model import get_stroop_model, N_UNITS
-from stroop_stimulus_util import get_stimulus, TASKS, COLORS, CONDITIONS
+from stroop_stimulus import get_stimulus, TASKS, COLORS, CONDITIONS
 
 sns.set(
     style='white', context='poster', palette="colorblind",
