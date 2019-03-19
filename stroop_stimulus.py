@@ -162,9 +162,10 @@ def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
     # combine the stimuli to lists
     color_naming_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
     word_reading_input_list = [inputs_wr_ctr, inputs_wr_cfl, inputs_wr_con]
-    # pack to dictionaries
+    # for each task, pack all conditions to dictionaries
     color_naming_input_dict = dict(zip(CONDITIONS, color_naming_input_list))
     word_reading_input_dict = dict(zip(CONDITIONS, word_reading_input_list))
+    # pack both tasks to a dict
     all_input_dict = dict(
         zip(TASKS, [color_naming_input_dict, word_reading_input_dict])
     )
