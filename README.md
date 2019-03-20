@@ -1,6 +1,8 @@
 # stroop model, for neu/psy 330 spring 2019 
 
-this repo replicates cohen et al (1990) w/ psyneulink composition (version==0.5.2.1)
+this repo replicates 
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/2200075">cohen et al (1990)</a>
+w/ psyneulink composition (version==0.5.2.1)
 
 here's the model... 
 
