@@ -6,7 +6,6 @@ w/ psyneulink composition (version==0.5.2.1)
 
 ### doc 
 
-files: 
 - `stroop_model.py`: the definition of the stroop model
 - `stroop_stimulus.py`: the definition of the stroop task
 - `run_exp_stroop.py`: run the standard stroop experiment
