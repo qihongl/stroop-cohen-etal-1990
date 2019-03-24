@@ -42,7 +42,7 @@ References:
 
 [1] Cohen, J. D., Dunbar, K., & McClelland, J. L. (1990). On the control of automatic processes: a parallel distributed processing account of the Stroop effect. Psychological Review, 97(3), 332–361. Retrieved from https://www.ncbi.nlm.nih.gov/pubmed/2200075
 
-[2] the code is based on all stroop model scripts I can possibily find from psyneulink example scripts 
+[2] the code is based on all stroop model scripts I can find from psyneulink example scripts 
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/tree/master/Scripts">here</a>, 
 and most importantly,
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/blob/master/Scripts/Examples/Stroop%20Basic.py">this</a> 
