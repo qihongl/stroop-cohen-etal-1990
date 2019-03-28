@@ -1,5 +1,5 @@
 """
-run the classic stroop experiment, analyze the data, plot/save the figures 
+run the classic stroop experiment, analyze the data, plot/save the figures
 """
 import os
 import numpy as np
@@ -42,6 +42,10 @@ get the stroop model
 model, nodes, model_metadata = get_stroop_model()
 [inp_color, inp_word, inp_task, hid_color, hid_word, output, decision] = nodes
 [integration_rate, dec_noise_std, unit_noise_std] = model_metadata
+# define log
+hid_color.set_log_conditions('value')
+hid_word.set_log_conditions('value')
+output.set_log_conditions('value')
 # model.show_graph()
 
 """define the inputs
@@ -88,7 +92,6 @@ def run_model(n_repeats, inputs, execution_id):
             execution_id=execution_id,
             inputs=inputs,
             num_trials=n_time_steps,
-            # termination_processing=termination_op
         )
         execution_id += 1
         # log acts
@@ -130,15 +133,13 @@ def compute_rt(act, threshold=.9):
     take the activity of the decision layer...
     check the earliest time point when activity > threshold...
     call that RT
-    *RT=np.nan if timeout
+    *RT=maxRT if timeout
     """
     n_time_steps_, N_UNITS_ = np.shape(act)
-    rts = np.full(shape=(N_UNITS_,), fill_value=np.nan)
-    for i in range(N_UNITS_):
-        tps_pass_threshold = np.where(act[:, i] > threshold)[0]
-        if len(tps_pass_threshold) > 0:
-            rts[i] = tps_pass_threshold[0]
-    return np.nanmin(rts)
+    tps_pass_threshold = np.where(act[:, 0] > threshold)[0]
+    if len(tps_pass_threshold) > 0:
+        return tps_pass_threshold[0]
+    return n_time_steps_
 
 
 # compute RTs for color naming and word reading
@@ -165,15 +166,13 @@ xtick_vals = range(len(CONDITIONS))
 # plot RT
 f, ax = plt.subplots(1, 1, figsize=(6, 6))
 ax.errorbar(
-    x=xtick_vals, y=mean_rt_cn, yerr=std_rt_cn, label='color naming'
+    x=xtick_vals, y=mean_rt_cn, yerr=std_rt_cn,
+    label='color naming', linestyle='-', color='black',
 )
 ax.errorbar(
-    x=xtick_vals, y=mean_rt_wr, yerr=std_rt_wr, label='word reading'
+    x=xtick_vals, y=mean_rt_wr, yerr=std_rt_wr,
+    label='word reading', linestyle='--', color='black',
 )
-# ax.plot(
-#     xtick_vals, mean_rt_cn, label='color naming')
-# ax.plot(
-#     xtick_vals, mean_rt_wr, label='word reading')
 
 ax.set_ylabel('Reaction time (n cycles)')
 ax.set_xticks(xtick_vals)

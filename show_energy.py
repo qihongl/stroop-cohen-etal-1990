@@ -36,10 +36,15 @@ n_colors = len(COLORS)
 """
 get the stroop model and the stimuli
 """
-model, nodes, model_params = get_stroop_model()
+# turn off noise
+unit_noise_std = 0
+dec_noise_std = 0
+model, nodes, model_params = get_stroop_model(unit_noise_std, dec_noise_std)
 [integration_rate, dec_noise_std, unit_noise_std] = model_params
 [inp_color, inp_word, inp_task, hid_color, hid_word, output, decision] = nodes
-
+hid_color.set_log_conditions('value')
+hid_word.set_log_conditions('value')
+output.set_log_conditions('value')
 
 """define the inputs
 i.e. all CONDITIONS x TASKS for the experiment
@@ -134,8 +139,8 @@ for i, cond in enumerate(CONDITIONS):
         Line2D([0], [0], color=col_pal[i], lw=lw_plt, label=cond))
 for i, task in enumerate(TASKS):
     lgd_elements.append(
-        Line2D([0], [0], linestyle=lsty_plt[i], color='black',
-               lw=lw_plt, label=task)
+        Line2D([0], [0], color='black', lw=lw_plt, label=task,
+               linestyle=lsty_plt[i])
     )
 
 """plot the activity
@@ -167,7 +172,7 @@ axes[0].legend(handles=lgd_elements, frameon=False, bbox_to_anchor=(.85, .8))
 f.tight_layout()
 sns.despine()
 
-imgname = 'dec_act.png'
+imgname = 'dec_eng.png'
 f.savefig(os.path.join(img_path, imgname), bbox_inches='tight')
 
 """
@@ -189,7 +194,6 @@ for i in np.arange(3, 6, 1):
 ax.set_title(f'Decision energy over time')
 ax.set_ylabel('Energy')
 ax.set_xlabel('Time')
-
 
 # Create the figure
 ax.legend(handles=lgd_elements, frameon=False, bbox_to_anchor=(.85, .95))
