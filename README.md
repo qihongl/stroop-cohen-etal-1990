@@ -23,17 +23,27 @@ here's the architecture...
 
 here's the main result, meant to qualitatively replicate fig 5 from cohen et al (1990). so in general, color naming is slower than word reading; color naming *red green* as "red" is much slower than word reading *red green* as "green", where *red green* = the word green painted in red. 
 
-<img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/stroop_0.2.png" alt="rt" height=350px>
+<img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/stroop.png" alt="rt" height=350px>
 
 
 here's another way to plot the data. these are kernel density estimates of the reaction time distributions.  
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/rt_kde.png" alt="rt kde" height=450px>
 
+here's the effect of demand: 
+
+<img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/demand.png" alt="demand" height=300px>
+
 
 and here's the SOA effect:  
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/soa.png" alt="soa" height=300px>
+
+
+decision energy: 
+
+<img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/dec_act.png"> alt="dec e" height=250px>
+
 
 
 
