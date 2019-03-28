@@ -38,12 +38,13 @@ def get_word_rep(word):
         raise ValueError(f'Unrecognizable word: {word}')
 
 
-def get_task_rep(task):
+def get_task_rep(task, demand=1):
     assert task in TASKS
+    assert demand >= 0
     if task == 'color naming':
-        return [1, 0]
+        return [demand, 0]
     else:
-        return [0, 1]
+        return [0, demand]
 
 
 def compute_delays(SOA):
@@ -70,7 +71,7 @@ def get_stimulus(
     color_input_layer, color,
     word_input_layer, word,
     task_input_layer, task,
-    n_time_steps, SOA=0,
+    n_time_steps, SOA=0, demand=1,
 ):
     """get a stroop stimulus
 
@@ -84,6 +85,8 @@ def get_stimulus(
         the stimuli sequence length
     SOA: int
         stimulus onset asynchrony; see compute_delays()
+    demand: positive float
+        the level of activity for the active task unit
 
     Returns
     -------
@@ -95,13 +98,12 @@ def get_stimulus(
     # set up the stimuli
     color_stimulus = np.tile(get_color_rep(color), (n_time_steps, 1))
     word_stimulus = np.tile(get_word_rep(word), (n_time_steps, 1))
-    task_stimulus = np.tile(get_task_rep(task), (n_time_steps, 1))
+    task_stimulus = np.tile(get_task_rep(task, demand), (n_time_steps, 1))
     # onset delay
     if SOA != 0:
         color_delay, word_delay = compute_delays(SOA)
         color_stimulus[:color_delay, :] = 0
         word_stimulus[:word_delay, :] = 0
-        # task_stimulus[:abs(SOA), :] = 0
     # form the input dict
     input_dict = {
         color_input_layer: color_stimulus,
@@ -111,7 +113,9 @@ def get_stimulus(
     return input_dict
 
 
-def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
+def get_stimulus_set(
+        inp_color, inp_word, inp_task, n_time_steps, SOA=0, demand=1
+):
     """get stimuli for all task x condition combination with some SOA
 
     Parameters
@@ -122,6 +126,8 @@ def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
         the stimuli sequence length
     SOA: int
         stimulus onset asynchrony; see compute_delays()
+    demand: positive float
+        the level of activity for the active task unit
 
     Returns
     -------
@@ -132,12 +138,12 @@ def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
     # color naming - congruent
     inputs_cn_con = get_stimulus(
         inp_color, 'red', inp_word, 'red', inp_task, 'color naming',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # color naming - incongruent
     inputs_cn_cfl = get_stimulus(
         inp_color, 'red', inp_word, 'green', inp_task, 'color naming',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # color naming - control
     inputs_cn_ctr = get_stimulus(
@@ -147,17 +153,17 @@ def get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps, SOA=0):
     # word reading - congruent
     inputs_wr_con = get_stimulus(
         inp_color, 'red', inp_word, 'red', inp_task, 'word reading',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # word reading - incongruent
     inputs_wr_cfl = get_stimulus(
         inp_color, 'green', inp_word, 'red', inp_task, 'word reading',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # word reading - control
     inputs_wr_ctr = get_stimulus(
         inp_color, None, inp_word, 'red', inp_task, 'word reading',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # combine the stimuli to lists
     color_naming_input_list = [inputs_cn_ctr, inputs_cn_cfl, inputs_cn_con]
