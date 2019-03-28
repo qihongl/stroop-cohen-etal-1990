@@ -148,7 +148,7 @@ def get_stimulus_set(
     # color naming - control
     inputs_cn_ctr = get_stimulus(
         inp_color, 'red', inp_word, None, inp_task, 'color naming',
-        n_time_steps, SOA
+        n_time_steps, SOA, demand
     )
     # word reading - congruent
     inputs_wr_con = get_stimulus(
