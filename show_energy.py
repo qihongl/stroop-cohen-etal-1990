@@ -179,7 +179,7 @@ col_pal = sns.color_palette('colorblind', n_colors=3)
 for i in np.arange(0, 3, 1):
     ax.plot(
         np.prod(np.squeeze(data_plt[i][:, :]), axis=1),
-        color=col_pal[i], label=CONDITIONS[i]
+        color=col_pal[i],
     )
 for i in np.arange(3, 6, 1):
     ax.plot(
