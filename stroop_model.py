@@ -9,16 +9,13 @@ import psyneulink as pnl
 N_UNITS = 2
 
 
-def get_stroop_model():
+def get_stroop_model(unit_noise_std=.01, dec_noise_std=.1):
     # model params
     # TODO bad practice, to be moved
     hidden_func = pnl.Logistic(gain=1.0, x_0=4.0)
-    unit_noise_std = .01
-    dec_noise_std = .1
     integration_rate = .2
     leak = 0
     competition = 1
-    # lca_mvn = [0, 1]
     # input layer, color and word
     inp_clr = pnl.TransferMechanism(
         size=N_UNITS, function=pnl.Linear, name='COLOR INPUT'
@@ -95,10 +92,10 @@ def get_stroop_model():
     model.add_linear_processing_pathway([inp_task, wts_tc, hid_clr])
     model.add_linear_processing_pathway([inp_task, wts_tw, hid_wrd])
     model.add_linear_processing_pathway([output, pnl.IDENTITY_MATRIX, decision])
-    # LOGGING
-    hid_clr.set_log_conditions('value')
-    hid_wrd.set_log_conditions('value')
-    output.set_log_conditions('value')
+    # # LOGGING
+    # hid_clr.set_log_conditions('value')
+    # hid_wrd.set_log_conditions('value')
+    # output.set_log_conditions('value')
     # collect the node handles
     nodes = [inp_clr, inp_wrd, inp_task, hid_clr, hid_wrd, output, decision]
     metadata = [integration_rate, dec_noise_std, unit_noise_std]
