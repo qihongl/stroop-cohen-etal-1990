@@ -42,7 +42,7 @@ and here's the SOA effect:
 
 decision energy: 
 
-<img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/dec_act.png"> alt="dec e" height=250px>
+<img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/dec_act.png" alt="dec_eng" height=250px>
 
 
 
