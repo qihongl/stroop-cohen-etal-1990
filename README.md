@@ -30,17 +30,19 @@ here's another way to plot the data. these are kernel density estimates of the r
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/rt_kde.png" alt="rt kde" height=450px>
 
-here's the effect of demand: 
+here's the effect of demand 
+- the left panel corresponds to fig 13 a in Cohen et al. 1990
+- note that the right panel is not plotting fig 13 b in the paper -- we don't have a shape naming condition here 
 
 <img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/demand.png" alt="demand" height=300px>
 
 
-and here's the SOA effect:  
+and here's the SOA effect - figure 7 in Cohen et al 1990: 
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/soa.png" alt="soa" height=300px>
 
 
-decision energy: 
+decision energy, idea from Shenhav et al. 2013: 
 
 <img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/dec_act.png" alt="dec_eng" height=250px>
 
@@ -51,7 +53,9 @@ References:
 
 [1] Cohen, J. D., Dunbar, K., & McClelland, J. L. (1990). On the control of automatic processes: a parallel distributed processing account of the Stroop effect. Psychological Review, 97(3), 332–361. Retrieved from https://www.ncbi.nlm.nih.gov/pubmed/2200075
 
-[2] the code is based on all stroop model scripts I can find from psyneulink example scripts 
+[2] Shenhav, A., Botvinick, M. M., & Cohen, J. D. (2013). The expected value of control: an integrative theory of anterior cingulate cortex function. Neuron, 79(2), 217–240. https://doi.org/10.1016/j.neuron.2013.07.007
+
+[3] the code is based on all stroop model scripts I can find from psyneulink example scripts 
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/tree/master/Scripts">here</a>, 
 and most importantly,
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/blob/master/Scripts/Examples/Stroop%20Basic.py">this</a> 
