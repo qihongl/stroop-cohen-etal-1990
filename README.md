@@ -2,7 +2,10 @@
 
 this repo replicates 
 <a href="https://www.ncbi.nlm.nih.gov/pubmed/2200075">cohen et al (1990)</a>
-w/ psyneulink composition (version==0.5.2.1)
+w/ 
+<a href="https://github.com/PrincetonUniversity/PsyNeuLink">psyneulink</a> 
+composition 
+- tested on version==0.5.2.1
 
 ### doc 
 
