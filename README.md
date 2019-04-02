@@ -1,11 +1,14 @@
-# stroop model, for neu/psy 330 spring 2019 
+# the stroop model
 
 this repo replicates 
 <a href="https://www.ncbi.nlm.nih.gov/pubmed/2200075">cohen et al (1990)</a>
 w/ 
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink">psyneulink</a> 
 composition 
-- tested on version==0.5.2.1
+(tested on version==0.5.2.1),
+this is developed for the course NEU|PSY330 
+<a href="https://registrar.princeton.edu/course-offerings/course-details?courseid=005628&term=1194">Computational Modeling of Psychological Function</a>, Spring 2019 
+
 
 ### doc 
 
