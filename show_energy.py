@@ -54,24 +54,6 @@ n_time_steps = 100
 
 input_dict = get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps)
 
-"""helper func
-"""
-
-
-def run_model(n_repeats, inputs, execution_id):
-    acts = np.zeros((n_repeats, n_time_steps, N_UNITS))
-    for i in range(n_repeats):
-        # print(f'execution_id={execution_id}')
-        model.run(
-            execution_id=execution_id,
-            inputs=inputs,
-            num_trials=n_time_steps,
-        )
-        execution_id += 1
-        # log acts
-        acts[i, :, :] = np.squeeze(model.results)
-    return acts, execution_id
-
 
 """run the model
 test the model on all CONDITIONS x TASKS combinations
@@ -110,7 +92,7 @@ def get_log_values(condition_indices):
         for ei in condition_indices
     ])
     out_acts = np.array([
-        np.squeeze(hid_color.log.nparray_dictionary()[ei]['value'])
+        np.squeeze(output.log.nparray_dictionary()[ei]['value'])
         for ei in condition_indices
     ])
     dec_acts = np.array([
@@ -123,7 +105,7 @@ def get_log_values(condition_indices):
 """plot
 """
 # collect the activity
-condition_indices = range(execution_id)
+condition_indices = [i for i in range(execution_id)]
 hw_acts, hc_acts, out_acts, dec_acts = get_log_values(condition_indices)
 
 
@@ -149,7 +131,6 @@ for i, task in enumerate(TASKS):
 f, axes = plt.subplots(2, 1, figsize=(8, 8))
 for j, task in enumerate(TASKS):
     for i, cond in enumerate(CONDITIONS):
-
         axes[0].plot(
             dec_acts[i + j*n_conditions][:, 0],
             color=col_pal[i], label=CONDITIONS[i], linestyle=lsty_plt[j],
@@ -178,17 +159,20 @@ f.savefig(os.path.join(img_path, imgname), bbox_inches='tight')
 """
 plot dec energy
 """
+
 data_plt = dec_acts
+# data_plt = out_acts
+np.shape(out_acts)
 f, ax = plt.subplots(1, 1, figsize=(8, 4))
 col_pal = sns.color_palette('colorblind', n_colors=3)
 for i in np.arange(0, 3, 1):
     ax.plot(
-        np.prod(np.squeeze(data_plt[i][:, :]), axis=1),
+        np.prod(np.squeeze(data_plt[i]), axis=1),
         color=col_pal[i],
     )
 for i in np.arange(3, 6, 1):
     ax.plot(
-        np.prod(np.squeeze(data_plt[i][:, :]), axis=1),
+        np.prod(np.squeeze(data_plt[i]), axis=1),
         color=col_pal[i-3], linestyle='--'
     )
 ax.set_title(f'Decision energy over time')
