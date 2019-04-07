@@ -1,5 +1,5 @@
 """
-evc scratch
+show decision activity, energy, entropy
 """
 import os
 import numpy as np
@@ -50,8 +50,7 @@ output.set_log_conditions('value')
 i.e. all CONDITIONS x TASKS for the experiment
 """
 # the length of the stimulus sequence
-n_time_steps = 100
-
+n_time_steps = 120
 input_dict = get_stimulus_set(inp_color, inp_word, inp_task, n_time_steps)
 
 
@@ -60,7 +59,6 @@ test the model on all CONDITIONS x TASKS combinations
 """
 
 execution_id = 0
-
 for task in TASKS:
     for cond in CONDITIONS:
         print(f'Running {task} - {cond} ... ')
@@ -84,21 +82,17 @@ def get_log_values(condition_indices):
     # word hidden layer
     hw_acts = np.array([
         np.squeeze(hid_word.log.nparray_dictionary()[ei]['value'])
-        for ei in condition_indices
-    ])
+        for ei in condition_indices])
     # color hidden layer
     hc_acts = np.array([
         np.squeeze(hid_color.log.nparray_dictionary()[ei]['value'])
-        for ei in condition_indices
-    ])
+        for ei in condition_indices])
     out_acts = np.array([
         np.squeeze(output.log.nparray_dictionary()[ei]['value'])
-        for ei in condition_indices
-    ])
+        for ei in condition_indices])
     dec_acts = np.array([
         np.squeeze(model.parameters.results.get(ei))
-        for ei in condition_indices
-    ])
+        for ei in condition_indices])
     return hw_acts, hc_acts, out_acts, dec_acts
 
 
@@ -128,19 +122,22 @@ for i, task in enumerate(TASKS):
 """plot the activity
 """
 
+data_plt = dec_acts
+# data_plt = out_acts
+
 f, axes = plt.subplots(2, 1, figsize=(8, 8))
 for j, task in enumerate(TASKS):
     for i, cond in enumerate(CONDITIONS):
         axes[0].plot(
-            dec_acts[i + j*n_conditions][:, 0],
+            data_plt[i + j*n_conditions][:, 0],
             color=col_pal[i], label=CONDITIONS[i], linestyle=lsty_plt[j],
         )
         axes[1].plot(
-            dec_acts[i + j*n_conditions][:, 1],
+            data_plt[i + j*n_conditions][:, 1],
             color=col_pal[i], linestyle=lsty_plt[j],
         )
 title_text = """
-Decision activity, color naming, red trial
+Decision activity, red trial
 """
 axes[0].set_title(title_text)
 for i, ax in enumerate(axes):
@@ -153,7 +150,7 @@ axes[0].legend(handles=lgd_elements, frameon=False, bbox_to_anchor=(.85, .8))
 f.tight_layout()
 sns.despine()
 
-imgname = 'dec_eng.png'
+imgname = 'dec_act.png'
 f.savefig(os.path.join(img_path, imgname), bbox_inches='tight')
 
 """
@@ -162,19 +159,18 @@ plot dec energy
 
 data_plt = dec_acts
 # data_plt = out_acts
-np.shape(out_acts)
+
 f, ax = plt.subplots(1, 1, figsize=(8, 4))
 col_pal = sns.color_palette('colorblind', n_colors=3)
-for i in np.arange(0, 3, 1):
-    ax.plot(
-        np.prod(np.squeeze(data_plt[i]), axis=1),
-        color=col_pal[i],
-    )
-for i in np.arange(3, 6, 1):
-    ax.plot(
-        np.prod(np.squeeze(data_plt[i]), axis=1),
-        color=col_pal[i-3], linestyle='--'
-    )
+counter = 0
+for tid, task in enumerate(TASKS):
+    for cid, cond in enumerate(CONDITIONS):
+        ax.plot(
+            np.prod(data_plt[counter], axis=1),
+            color=col_pal[np.mod(counter, n_conditions)],
+            linestyle=lsty_plt[tid]
+        )
+        counter += 1
 ax.set_title(f'Decision energy over time')
 ax.set_ylabel('Energy')
 ax.set_xlabel('Time')
@@ -185,5 +181,41 @@ ax.legend(handles=lgd_elements, frameon=False, bbox_to_anchor=(.85, .95))
 f.tight_layout()
 sns.despine()
 
-imgname = 'dec_act.png'
+imgname = 'dec_eng.png'
+f.savefig(os.path.join(img_path, imgname), bbox_inches='tight')
+
+
+"""
+plot ent
+"""
+
+data_plt = dec_acts
+# data_plt = out_acts
+
+f, ax = plt.subplots(1, 1, figsize=(8, 4))
+col_pal = sns.color_palette('colorblind', n_colors=3)
+counter = 0
+for tid, task in enumerate(TASKS):
+    for cid, cond in enumerate(CONDITIONS):
+        ent = - np.sum([
+            data_plt[counter][:, i] * np.log(data_plt[counter][:, i])
+            for i in range(N_UNITS)
+        ], axis=0)
+        ax.plot(
+            ent,
+            color=col_pal[np.mod(counter, n_conditions)],
+            linestyle=lsty_plt[tid]
+        )
+        counter += 1
+ax.set_title(f'Decision entropy over time')
+ax.set_ylabel('Entropy')
+ax.set_xlabel('Time')
+
+# Create the figure
+ax.legend(handles=lgd_elements, frameon=False, bbox_to_anchor=(.85, .95))
+
+f.tight_layout()
+sns.despine()
+
+imgname = 'dec_ent.png'
 f.savefig(os.path.join(img_path, imgname), bbox_inches='tight')

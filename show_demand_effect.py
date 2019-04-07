@@ -59,21 +59,6 @@ test the model on all CONDITIONS x TASKS combinations
 """
 
 
-def run_model(n_repeats, inputs, execution_id):
-    acts = np.zeros((n_repeats, n_time_steps, N_UNITS))
-    for i in range(n_repeats):
-        # print(f'execution_id={execution_id}')
-        model.run(
-            execution_id=execution_id,
-            inputs=inputs,
-            num_trials=n_time_steps,
-        )
-        execution_id += 1
-        # log acts
-        acts[i, :, :] = np.squeeze(model.results)
-    return acts, execution_id
-
-
 execution_id = 0
 for did, demand in enumerate(demand_levels):
     for task in TASKS:
