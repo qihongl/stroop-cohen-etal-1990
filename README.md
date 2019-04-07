@@ -13,7 +13,7 @@ this is developed for the course NEU|PSY330
 ### doc 
 
 - `stroop_model.py`: the definition of the stroop model
-- `stroop_stimulus.py`: the definition of the stroop task; I also uploaded this helper script this as a package, so you can `pip install stroop`. 
+- `stroop_stimulus.py`: the definition of the stroop task; I also uploaded this helper script this as a package, so you can `pip install stroop`. Here's its <a href="https://github.com/qihongl/stroop-stimuli">repo</a>
 - `run_exp_*.py`: run some experiment, where `*` is the name of the experiemnt
 - `show_*.py`: analyze and plot the data 
 - `stroop-feedforward.ipynb` and `stroop-linear.ipynb`: two simplifications of the full stroop model, for teaching purpose
