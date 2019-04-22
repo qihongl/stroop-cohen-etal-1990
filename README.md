@@ -9,8 +9,10 @@ composition
 this is developed for the course NEU|PSY330 
 <a href="https://registrar.princeton.edu/course-offerings/course-details?courseid=005628&term=1194">Computational Modeling of Psychological Function</a>, Spring 2019 
 
-
 ### doc 
+
+here're some <a href="https://docs.google.com/presentation/d/1uG9LVT5susIOUvRCeg8qzzZNwNnwRbGPTiRGcjAyqGU/edit?usp=sharing">slides</a> 
+i used for the lab
 
 - `stroop_model.py`: the definition of the stroop model
 - `stroop_stimulus.py`: the definition of the stroop task; I also uploaded this helper script this as a package, so you can `pip install stroop`. Here's its <a href="https://github.com/qihongl/stroop-stimuli">repo</a>
@@ -19,7 +21,7 @@ this is developed for the course NEU|PSY330
 - `stroop-feedforward.ipynb` and `stroop-linear.ipynb`: two simplifications of the full stroop model, for teaching purpose
 
 
-### the full model
+### the model
 
 here's the architecture... 
 
@@ -27,7 +29,10 @@ here's the architecture...
 
 ### results
 
-here's the main result, meant to qualitatively replicate fig 5 from cohen et al (1990). so in general, color naming is slower than word reading; color naming *red green* as "red" is much slower than word reading *red green* as "green", where *red green* = the word green painted in red. 
+here's the main result, which qualitatively replicate fig 5 from cohen et al (1990). in general...
+- color naming is slower than word reading
+- color doesn't affect word reading but word affect color naming a lot. for example, color naming *red green* as "red" is much slower than word reading *red green* as "green", where *red green* = the word green painted in red. 
+- magnitude(interference) > magnitude(facilitation)
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/stroop.png" alt="rt" height=350px>
 
