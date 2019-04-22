@@ -48,12 +48,16 @@ here's the effect of demand
 <img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/demand.png" alt="demand" height=300px>
 
 
-and here's the SOA effect - figure 7 in Cohen et al 1990: 
+and here's the 
+<a href="https://en.wikipedia.org/wiki/Stimulus_onset_asynchrony">SOA</a> 
+effect - figure 7 in Cohen et al 1990: 
 
 <img src="https://github.com/qihongl/stroop-pnlcomp/blob/master/imgs/soa.png" alt="soa" height=300px>
 
 
-decision energy, idea from Shenhav et al. 2013: 
+decision 
+<a href="https://en.wikipedia.org/wiki/Hopfield_network#Energy">energy</a>, 
+see Botvinick et al. 2001 and Shenhav et al. 2013: 
 
 <img src="https://github.com/qihongl/stroop-cohen-etal-1990/blob/master/imgs/dec_act.png" alt="dec_eng" height=250px>
 
@@ -66,7 +70,9 @@ References:
 
 [2] Shenhav, A., Botvinick, M. M., & Cohen, J. D. (2013). The expected value of control: an integrative theory of anterior cingulate cortex function. Neuron, 79(2), 217–240. https://doi.org/10.1016/j.neuron.2013.07.007
 
-[3] the code is based on all stroop model scripts I can find from psyneulink example scripts 
+[3] Botvinick, M. M., Braver, T. S., Barch, D. M., Carter, C. S., & Cohen, J. D. (2001). Conflict monitoring and cognitive control. Psychological Review, 108(3), 624–652. Retrieved from https://www.ncbi.nlm.nih.gov/pubmed/11488380
+
+[4] the code is based on all stroop model scripts I can find from psyneulink example scripts 
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/tree/master/Scripts">here</a>, 
 and most importantly,
 <a href="https://github.com/PrincetonUniversity/PsyNeuLink/blob/master/Scripts/Examples/Stroop%20Basic.py">this</a> 
